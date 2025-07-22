@@ -18,17 +18,18 @@ model, processor = load_model()
 st.set_page_config(page_title="CLIP 이미지 검색기", layout="wide")
 st.title("🔍 텍스트로 내 폴더 이미지 검색 (CLIP 기반)")
 
-# ✅ 사이드바에 설정 메뉴 추가
-st.sidebar.header("⚙️ 설정")
-image_folder = st.sidebar.text_input("📁 이미지 폴더 경로", "C:/Users/USER/Pictures/image")
+# ✅ 이미지 폴더 경로는 메인 화면에 그대로 유지
+image_folder = st.text_input("📁 이미지 폴더 경로", "C:/Users/USER/Pictures/image")
 
+# 프롬프트 입력 (메인 화면)
+prompt = st.text_input("💬 검색할 텍스트 프롬프트 입력")
+
+# ✅ 사이드바에 정렬 옵션만 추가
+st.sidebar.header("⚙️ 옵션")
 sort_option = st.sidebar.selectbox(
     "📂 이미지 정렬 방식",
     ("날짜순(최신)", "날짜순(오래된)", "파일명순(A~Z)", "파일명순(Z~A)", "파일크기순(큰→작은)", "파일크기순(작은→큰)")
 )
-
-# 프롬프트 입력 (메인 화면)
-prompt = st.text_input("💬 검색할 텍스트 프롬프트 입력")
 
 # 이미지 검색 버튼
 if st.button("검색"):
