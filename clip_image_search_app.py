@@ -3,6 +3,7 @@ from PIL import Image
 from transformers import CLIPProcessor, CLIPModel
 import torch
 import os
+from datetime import datetime
 
 # 모델 및 전처리기 로드
 @st.cache_resource
@@ -17,46 +18,49 @@ model, processor = load_model()
 st.set_page_config(page_title="CLIP 이미지 검색기", layout="wide")
 st.title("🔍 텍스트로 내 폴더 이미지 검색 (CLIP 기반)")
 
-# 이미지 폴더 선택
-image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
+# ✅ 이미지 폴더 경로는 메인 화면에 그대로 유지
+image_folder = st.text_input("📁 이미지 폴더 경로", "C:/Users/USER/Pictures/image")
 
-# 프롬프트 입력
-prompt = st.text_input("💬 검색할 텍스트 프롬프트", "a photo of the sea")
+# 프롬프트 입력 (메인 화면)
+prompt = st.text_input("💬 검색할 텍스트 프롬프트 입력")
 
-# 검색 버튼
-if st.button("🔎 검색 시작"):
-    if not os.path.exists(image_folder):
-        st.error("❌ 폴더 경로가 존재하지 않습니다.")
+# ✅ 사이드바에 정렬 옵션만 추가
+st.sidebar.header("⚙️ 옵션")
+sort_option = st.sidebar.selectbox(
+    "📂 이미지 정렬 방식",
+    ("날짜순(최신)", "날짜순(오래된)", "파일명순(A~Z)", "파일명순(Z~A)", "파일크기순(큰→작은)", "파일크기순(작은→큰)")
+)
+
+# 이미지 검색 버튼
+if st.button("검색"):
+    if os.path.exists(image_folder):
+        image_files = [
+            os.path.join(image_folder, f)
+            for f in os.listdir(image_folder)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        # ✅ 정렬 기능 적용
+        if sort_option == "날짜순(최신)":
+            image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        elif sort_option == "날짜순(오래된)":
+            image_files.sort(key=lambda x: os.path.getmtime(x))
+        elif sort_option == "파일명순(A~Z)":
+            image_files.sort()
+        elif sort_option == "파일명순(Z~A)":
+            image_files.sort(reverse=True)
+        elif sort_option == "파일크기순(큰→작은)":
+            image_files.sort(key=lambda x: os.path.getsize(x), reverse=True)
+        elif sort_option == "파일크기순(작은→큰)":
+            image_files.sort(key=lambda x: os.path.getsize(x))
+
+        # 검색된 이미지 출력
+        for image_file in image_files:
+            img = Image.open(image_file)
+            st.image(
+                img,
+                caption=f"{os.path.basename(image_file)} - 수정일: {datetime.fromtimestamp(os.path.getmtime(image_file)).strftime('%Y-%m-%d %H:%M:%S')}",
+                use_column_width=True
+            )
     else:
-        image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg"))]
-        if len(image_paths) == 0:
-            st.warning("⚠️ 이미지가 없습니다.")
-        else:
-            with st.spinner("CLIP 모델로 검색 중..."):
-                # 프롬프트 임베딩
-                text_inputs = processor(text=[prompt], return_tensors="pt", padding=True)
-                with torch.no_grad():
-                    text_features = model.get_text_features(**text_inputs)[0]
-
-                # 이미지 임베딩 및 유사도 계산
-                results = []
-                for path in image_paths:
-                    try:
-                        image = Image.open(path).convert("RGB")
-                        inputs = processor(images=image, return_tensors="pt")
-                        with torch.no_grad():
-                            image_features = model.get_image_features(**inputs)[0]
-                            score = torch.nn.functional.cosine_similarity(text_features, image_features, dim=0)
-                        results.append((score.item(), path))
-                    except Exception as e:
-                        st.write(f"{path} 처리 중 오류 발생: {e}")
-
-                # 결과 정렬 및 표시
-                results.sort(reverse=True)
-                top_k = min(5, len(results))
-                st.subheader(f"📸 상위 {top_k}개 결과:")
-                cols = st.columns(top_k)
-                for i in range(top_k):
-                    score, path = results[i]
-                    with cols[i]:
-                        st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}", use_column_width=True)
+        st.error("❌ 지정한 경로가 존재하지 않습니다.")
