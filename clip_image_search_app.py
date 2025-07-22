@@ -16,6 +16,8 @@ model, processor = load_model()
 # 페이지 설정
 st.set_page_config(page_title="CLIP 이미지 검색기", layout="wide")
 st.title("🔍 텍스트로 내 폴더 이미지 검색 (CLIP 기반)")
+with st.sidebar:
+    num_of_output = st.number_input("출력할 사진의 갯수", 5)
 
 # 이미지 폴더 선택
 image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
@@ -28,7 +30,7 @@ if st.button("🔎 검색 시작"):
     if not os.path.exists(image_folder):
         st.error("❌ 폴더 경로가 존재하지 않습니다.")
     else:
-        image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg"))]
+        image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg", ".webp"))]
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
         else:
@@ -53,10 +55,10 @@ if st.button("🔎 검색 시작"):
 
                 # 결과 정렬 및 표시
                 results.sort(reverse=True)
-                top_k = min(5, len(results))
+                top_k = min(int(num_of_output), len(results))
                 st.subheader(f"📸 상위 {top_k}개 결과:")
                 cols = st.columns(top_k)
                 for i in range(top_k):
                     score, path = results[i]
                     with cols[i]:
-                        st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}", use_column_width=True)
+                        st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}", use_container_width=True)
