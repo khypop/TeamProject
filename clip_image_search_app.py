@@ -18,6 +18,13 @@ st.set_page_config(page_title="CLIP 이미지 검색기", layout="wide")
 st.title("🔍 텍스트로 내 폴더 이미지 검색 (CLIP 기반)")
 with st.sidebar:
     num_of_output = st.number_input("출력할 사진의 갯수", 5)
+    sort_option = st.selectbox(
+        "📂 결과 정렬 방식 선택",
+        ("정확도순(높은→낮은)", "정확도순(낮은→높은)",
+         "날짜순(최신)", "날짜순(오래된)",
+         "파일명순(A~Z)", "파일명순(Z~A)",
+         "파일크기순(큰→작은)", "파일크기순(작은→큰)")
+    )
 
 # 이미지 폴더 선택
 image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
@@ -52,6 +59,23 @@ if st.button("🔎 검색 시작"):
                         results.append((score.item(), path))
                     except Exception as e:
                         st.write(f"{path} 처리 중 오류 발생: {e}")
+                # ✅ 정렬 적용
+                if sort_option == "정확도순(높은→낮은)":
+                    results.sort(key=lambda x: x[0], reverse=True)
+                elif sort_option == "정확도순(낮은→높은)":
+                    results.sort(key=lambda x: x[0])
+                elif sort_option == "날짜순(최신)":
+                    results.sort(key=lambda x: os.path.getmtime(x[1]), reverse=True)
+                elif sort_option == "날짜순(오래된)":
+                    results.sort(key=lambda x: os.path.getmtime(x[1]))
+                elif sort_option == "파일명순(A~Z)":
+                    results.sort(key=lambda x: os.path.basename(x[1]).lower())
+                elif sort_option == "파일명순(Z~A)":
+                    results.sort(key=lambda x: os.path.basename(x[1]).lower(), reverse=True)
+                elif sort_option == "파일크기순(큰→작은)":
+                    results.sort(key=lambda x: os.path.getsize(x[1]), reverse=True)
+                elif sort_option == "파일크기순(작은→큰)":
+                    results.sort(key=lambda x: os.path.getsize(x[1]))
 
                 # 결과 정렬 및 표시
                 results.sort(reverse=True)
