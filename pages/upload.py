@@ -9,7 +9,7 @@ st.title("이미지 업로드 후 텍스트 추출")
 image_upload = st.file_uploader("upload", type=["jpg", "png"])
 
 with st.sidebar:
-  st.page_link("main.py", label = "Home", icon = "🏠")
+  st.page_link("clip_image_search_app.py", label = "Home", icon = "🏠")
 
 if image_upload is None:
   st.write("이미지 파일을 올려주세요.")
