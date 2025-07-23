@@ -25,7 +25,7 @@ with st.sidebar:
          "파일명순(A~Z)", "파일명순(Z~A)",
          "파일크기순(큰→작은)", "파일크기순(작은→큰)")
     )
-
+    page2 = st.page_link("pages/upload.py", label="Image Upload", icon="⬆️") # pages 폴더도 다운 받아야 함.
 # 이미지 폴더 선택
 image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
 
