@@ -84,6 +84,7 @@ if st.button("🔎 검색 시작"):
                 pass
             except Exception as e:
                 error.append(f"{path} 처리 중 오류 발생: {e}")
+        lower(image_folder)
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
         else:
