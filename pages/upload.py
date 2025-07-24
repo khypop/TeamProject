@@ -5,7 +5,7 @@ from transformers import BlipProcessor, BlipForConditionalGeneration
 
 model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base") # 이 Salesforce/blip-image-captioning-base를 model에 저장함.
 
-st.title("이미지 업로드 후 텍스트 추출")
+st.title("이미지에 정직한 제목 붙이기 (blip을 이용한 이미지에서 텍스트 추출)")
 image_upload = st.file_uploader("upload", type=["jpg", "png"]) # 이미지 파일만을 업로드해야 함.
 
 with st.sidebar:
