@@ -59,11 +59,31 @@ if sel_search_type == "텍스트로 검색" :
 else:
     query_image = st.file_uploader("🖼️ 검색에 사용할 이미지를 드래그 또는 선택하세요", type=["jpg", "jpeg", "png", "webp"])
 
+image_paths = []
+error = []
 # 검색 버튼
 if st.button("🔎 검색 시작"):
     if not os.path.exists(image_folder):
         st.error("❌ 폴더 경로가 존재하지 않습니다.")
     else:
+        def lower(folder):
+            try:
+                folder = list(os.scandir(folder))
+            except PermissionError:
+                return
+            except Exception:
+                return
+            try:
+                for dir in folder:
+                    if dir.is_file():
+                        if dir.name.lower().endswith((".jpg", ".png", ".jpeg", ".webp"))
+                            image_paths.append(dir.path)
+                    elif dir.is_dir():
+                        lower(dir.path)
+            except PermissionError:
+                pass
+            except Exception as e:
+                error.append(f"{path} 처리 중 오류 발생: {e}")
         image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg", ".webp"))]
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
@@ -97,7 +117,7 @@ if st.button("🔎 검색 시작"):
                                 score = torch.nn.functional.cosine_similarity(query_features, image_features, dim=0)
                         results.append((score.item(), path))
                     except Exception as e:
-                        st.write(f"{path} 처리 중 오류 발생: {e}")
+                        error.append(f"{path} 처리 중 오류 발생: {e}")
 
 
 
@@ -142,4 +162,9 @@ if st.button("🔎 검색 시작"):
                         with cols[j]:
                             st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}")
                     i += cols_per_row
+
+                    if error:
+                        with st.expander("오류 로그")
+                            for er in error:
+                                st.write(er)
     
