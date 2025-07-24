@@ -59,6 +59,8 @@ if sel_search_type == "텍스트로 검색" :
 else:
     query_image = st.file_uploader("🖼️ 검색에 사용할 이미지를 드래그 또는 선택하세요", type=["jpg", "jpeg", "png", "webp"])
 
+if "error" not in st.session_state:
+    st.session_state.error = []
 # 검색 버튼
 if st.button("🔎 검색 시작"):
     image_paths = []
@@ -83,7 +85,7 @@ if st.button("🔎 검색 시작"):
             except PermissionError:
                 pass
             except Exception as e:
-                error.append(f"{path} 처리 중 오류 발생: {e}")
+                st.session_state.error.append(f"{path} 처리 중 오류 발생: {e}")
         lower(image_folder)
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
@@ -117,7 +119,7 @@ if st.button("🔎 검색 시작"):
                                 score = torch.nn.functional.cosine_similarity(query_features, image_features, dim=0)
                         results.append((score.item(), path))
                     except Exception as e:
-                        error.append(f"{path} 처리 중 오류 발생: {e}")
+                        st.session_state.error.append(f"{path} 처리 중 오류 발생: {e}")
 
 
 
@@ -165,6 +167,6 @@ if st.button("🔎 검색 시작"):
 
     if error:
         with st.expander("오류 로그"):
-            for er in error:
+            for er in st.session_state.error:
                 st.write(er)
     
