@@ -84,7 +84,6 @@ if st.button("🔎 검색 시작"):
                 pass
             except Exception as e:
                 error.append(f"{path} 처리 중 오류 발생: {e}")
-        image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg", ".webp"))]
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
         else:
