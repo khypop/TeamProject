@@ -38,7 +38,7 @@ if st.button("🔎 검색 시작"):
         st.error("❌ 폴더 경로가 존재하지 않습니다.")
     else:
         for root, dirs, files in os.walk(image_folder):
-            image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith((".jpg", ".png", ".jpeg", ".webp"))]
+            image_paths = [os.path.join(root, f) for f in os.listdir(files) if f.endswith((".jpg", ".png", ".jpeg", ".webp"))]
         if len(image_paths) == 0:
             st.warning("⚠️ 이미지가 없습니다.")
         else:
