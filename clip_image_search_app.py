@@ -38,6 +38,8 @@ st.title("🔍 텍스트로 내 폴더 이미지 검색 (CLIP 기반)")
 #사이드바 설정
 with st.sidebar:
     num_of_output = st.number_input("출력할 사진의 갯수", 5)
+    #----------------------selectbox 추가-------------------------------------------
+    sel_search_type = st.selectbox("검색할 방식",("텍스트로 검색", "이미지로 검색"))
     sort_option = st.selectbox(
         "📂 결과 정렬 방식 선택",
         ("정확도순(높은→낮은)",
@@ -51,7 +53,11 @@ with st.sidebar:
 image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
 
 # 프롬프트 입력
-prompt = st.text_input("💬 검색할 텍스트 프롬프트", "a photo of the sea")
+if sel_search_type == "텍스트로 검색" :
+    prompt = st.text_input("💬 검색할 텍스트 프롬프트", "a photo of the sea")
+# 이미지로 검색 ----------------------------추가부분------------------------------------
+else:
+    query_image = st.file_uploader("🖼️ 검색에 사용할 이미지를 드래그 또는 선택하세요", type=["jpg", "jpeg", "png", "webp"])
 
 # 검색 버튼
 if st.button("🔎 검색 시작"):
@@ -64,9 +70,17 @@ if st.button("🔎 검색 시작"):
         else:
             with st.spinner("CLIP 모델로 검색 중..."):
                 # 프롬프트 임베딩
-                text_inputs = processor(text=[prompt], return_tensors="pt", padding=True)
-                with torch.no_grad():
-                    text_features = model.get_text_features(**text_inputs)[0]
+                if sel_search_type == "텍스트로 검색":
+                    text_inputs = processor(text=[prompt], return_tensors="pt", padding=True)
+                    with torch.no_grad():
+                        text_features = model.get_text_features(**text_inputs)[0]
+
+                # 이미지 임베딩 ----------------------------------------------추가-------------------------------------------
+                else:
+                    uploaded_image = Image.open(query_image).convert("RGB")
+                    inputs = processor(images=uploaded_image, return_tensors="pt")
+                    with torch.no_grad():
+                        query_features = model.get_image_features(**inputs)[0]
 
                 # 이미지 임베딩 및 유사도 계산
                 results = []
@@ -76,7 +90,11 @@ if st.button("🔎 검색 시작"):
                         inputs = processor(images=image, return_tensors="pt")
                         with torch.no_grad():
                             image_features = model.get_image_features(**inputs)[0]
-                            score = torch.nn.functional.cosine_similarity(text_features, image_features, dim=0)
+                            if sel_search_type == "텍스트로 검색": #텍스트로 검색시 유사도
+                                score = torch.nn.functional.cosine_similarity(text_features, image_features, dim=0)
+
+                            else:                                 #이미지로 검색시 유사도----------------------------------------추가--------------------------------------------
+                                score = torch.nn.functional.cosine_similarity(query_features, image_features, dim=0)
                         results.append((score.item(), path))
                     except Exception as e:
                         st.write(f"{path} 처리 중 오류 발생: {e}")
