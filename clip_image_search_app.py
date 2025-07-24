@@ -59,10 +59,10 @@ if sel_search_type == "텍스트로 검색" :
 else:
     query_image = st.file_uploader("🖼️ 검색에 사용할 이미지를 드래그 또는 선택하세요", type=["jpg", "jpeg", "png", "webp"])
 
-image_paths = []
-error = []
 # 검색 버튼
 if st.button("🔎 검색 시작"):
+    image_paths = []
+    error = []
     if not os.path.exists(image_folder):
         st.error("❌ 폴더 경로가 존재하지 않습니다.")
     else:
@@ -163,8 +163,8 @@ if st.button("🔎 검색 시작"):
                             st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}")
                     i += cols_per_row
 
-                    if error:
-                        with st.expander("오류 로그"):
-                            for er in error:
-                                st.write(er)
+    if error:
+        with st.expander("오류 로그"):
+            for er in error:
+                st.write(er)
     
