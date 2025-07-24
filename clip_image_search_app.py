@@ -76,7 +76,7 @@ if st.button("🔎 검색 시작"):
             try:
                 for dir in folder:
                     if dir.is_file():
-                        if dir.name.lower().endswith((".jpg", ".png", ".jpeg", ".webp"))
+                        if dir.name.lower().endswith((".jpg", ".png", ".jpeg", ".webp")):
                             image_paths.append(dir.path)
                     elif dir.is_dir():
                         lower(dir.path)
@@ -164,7 +164,7 @@ if st.button("🔎 검색 시작"):
                     i += cols_per_row
 
                     if error:
-                        with st.expander("오류 로그")
+                        with st.expander("오류 로그"):
                             for er in error:
                                 st.write(er)
     
