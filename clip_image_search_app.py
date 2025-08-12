@@ -162,9 +162,15 @@ if st.button("🔎 검색 시작"):
                             else:
                                 score = torch.nn.functional.cosine_similarity(query_features, image_features, dim=0)
                         
-                        # 유사도가 0.24 미만인 이미지는 제외
-                        if score.item() >= 0.24:
-                            results.append((score.item(), path))
+                        # 검색 방식에 따른 유사도 필터링
+                        if sel_search_type == "텍스트로 검색":
+                            # 텍스트 검색: 유사도 0.24 이상
+                            if score.item() >= 0.24:
+                                results.append((score.item(), path))
+                        else:
+                            # 이미지 검색: 유사도 0.8 이상
+                            if score.item() >= 0.8:
+                                results.append((score.item(), path))
                     except Exception as e:
                         st.session_state.error.append(f"{path} 처리 중 오류 발생: {e}")
 
