@@ -12,6 +12,8 @@ CUSTOM_MODEL_PATH = "clip_coco.pth"
 @st.cache_resource
 def load_model():
     model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    model.load_state_dict(torch.load(CUSTOM_MODEL_PATH, map_location='cpu'))
+    
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     return model, processor
 
@@ -284,3 +286,4 @@ if st.session_state.error:
     with st.expander("오류 로그"):
         for er in st.session_state.error:
             st.write(er)
+
