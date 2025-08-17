@@ -104,9 +104,8 @@ if sel_search_type == "텍스트로 검색":
     prompt = st.text_input("💬 검색할 텍스트 프롬프트", "a photo of the sea")
 else:
     query_image = st.file_uploader("🖼️ 검색에 사용할 이미지를 선택하세요", type=["jpg", "jpeg", "png", "webp"])
-        if query_image is not None:
-            st.image(query_image, caption="검색에 사용할 이미지", width=100)
-
+    if query_image is not None:
+        st.image(query_image, caption="검색에 사용할 이미지", width=100)
 # 오류 로그 초기화
 if "error" not in st.session_state:
     st.session_state.error = []
@@ -288,6 +287,3 @@ if st.session_state.error:
     with st.expander("오류 로그"):
         for er in st.session_state.error:
             st.write(er)
-
-
-
