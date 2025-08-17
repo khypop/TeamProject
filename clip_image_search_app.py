@@ -287,3 +287,4 @@ if st.session_state.error:
     with st.expander("오류 로그"):
         for er in st.session_state.error:
             st.write(er)
+
