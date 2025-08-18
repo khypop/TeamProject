@@ -97,7 +97,7 @@ with st.sidebar:
     )
 
 # 이미지 폴더 경로 입력
-image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "C:/Users/USER/Pictures/image")
+image_folder = st.text_input("🔧 이미지 폴더 경로를 입력하세요", "E:/Teamproject/image-up")
 
 # 검색 프롬프트 또는 이미지 업로드
 if sel_search_type == "텍스트로 검색":
@@ -167,7 +167,7 @@ if st.button("🔎 검색 시작"):
                         # 검색 방식에 따른 유사도 필터링
                         if sel_search_type == "텍스트로 검색":
                             # 텍스트 검색: 유사도 0.24 이상
-                            if score.item() >= 0.24:
+                            if score.item() >= 0.14:
                                 results.append((score.item(), path))
                         else:
                             # 이미지 검색: 유사도 0.8 이상
@@ -215,25 +215,9 @@ if st.session_state.search_performed and st.session_state.search_results:
                 # 이미지 표시 (고정 크기)
                 st.image(path, caption=f"{os.path.basename(path)}\n유사도: {score:.4f}", width=240, use_container_width=False)
 
-                # 저장 설정 UI
-                with st.expander(f"💾 저장 설정", expanded=False):
-                    # 컨테이너로 너비 제한
-                    with st.container():
-                        # 기본 저장 경로 표시
-                        st.markdown("**📁 기본 경로:**")
-                        st.caption(default_save_folder)
-                        
-                        # 구분선
-                        st.divider()
-                        
-                        # 개별 저장 경로 설정
-                        custom_save_folder = st.text_input(
-                            "📂 저장 폴더",
-                            value=default_save_folder,
-                            key=f"custom_folder_{i}_{j}",
-                            help="개별 저장 경로 설정",
-                            max_chars=50
-                        )
+                # 저장 UI
+                with st.expander(f"💾 저장", expanded=False):
+
                         
                         # 파일명 설정
                         original_filename = os.path.basename(path)
@@ -253,21 +237,13 @@ if st.session_state.search_performed and st.session_state.search_results:
                             st.markdown(f"**{ext}**")
                             st.markdown("")  # 간격 조정
                         
-                        # 최종 저장 경로 미리보기
-                        final_filename = f"{custom_filename}{ext}" if custom_filename else original_filename
-                        final_save_path = os.path.join(custom_save_folder, final_filename)
-                        
-                        st.markdown("**🎯 저장 경로:**")
-                        # 경로가 길면 말줄임표로 표시
-                        if len(final_save_path) > 40:
-                            display_path = final_save_path[:37] + "..."
-                        else:
-                            display_path = final_save_path
-                        st.caption(display_path)
-                        
                         # 저장 버튼
                         if st.button("💾 저장하기", key=f"save_{i}_{j}", use_container_width=True):
-                            success, message = save_image(path, final_save_path)
+                            # 👇 os.path.join을 사용하여 안전하게 경로를 합칩니다.
+                            final_filename = f"{custom_filename}{ext}"
+                            destination_path = os.path.join(default_save_folder, final_filename)
+                        
+                            success, message = save_image(path, destination_path)
                             if success:
                                 st.session_state.save_messages.append({"type": "success", "message": message})
                             else:
@@ -287,5 +263,4 @@ if st.session_state.error:
     with st.expander("오류 로그"):
         for er in st.session_state.error:
             st.write(er)
-
 
